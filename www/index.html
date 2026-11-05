@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eceee9">
+<title>Cercle Harmonique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Noto+Music&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><h1>Cercle Harmonique</h1><span>analyse de grilles</span></div>
+  <div class="transport" role="group" aria-label="Lecture">
+    <button class="btn" id="btn-prev" title="Accord précédent (←)" aria-label="Accord précédent"><svg viewBox="0 0 16 16"><path d="M3 3h2v10H3zM14 3v10L6 8z"/></svg></button>
+    <button class="btn play" id="btn-play" title="Lecture / pause (espace)" aria-label="Lecture"><svg viewBox="0 0 16 16" id="ico-play"><path d="M4 2.5v11L13.5 8z"/></svg></button>
+    <button class="btn" id="btn-next" title="Accord suivant (→)" aria-label="Accord suivant"><svg viewBox="0 0 16 16"><path d="M11 3h2v10h-2zM2 3v10l8-5z"/></svg></button>
+    <label class="bpm" for="inp-bpm"><span class="bpm-l">Tempo</span><span class="bpm-s" aria-hidden="true">♩</span> <input id="inp-bpm" type="number" min="30" max="320" step="1" value="120"></label>
+    <button class="btn" id="btn-loop" aria-pressed="true" title="Reprendre au début">Boucle</button>
+    <button class="btn" id="btn-sound" aria-pressed="false" title="Jouer les accords">Son</button>
+  </div>
+  <div class="panels" role="group" aria-label="Panneaux affichés"><button class="btn" id="tg-circle" aria-pressed="true" title="Afficher ou masquer le cercle">Cercle</button><button class="btn" id="tg-detail" aria-pressed="true" title="Afficher ou masquer l'analyse de l'accord">Analyse</button></div>
+  <div class="pos"><span id="pos-txt">Mesure 1</span><span class="beats" id="beats"></span></div>
+  <button class="btn menu-btn" id="btn-menu" aria-label="Réglages" aria-expanded="false" aria-controls="drawer" title="Réglages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+
+<nav class="tabbar" id="tabbar" aria-label="Sections">
+  <button data-m="circle"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.6"/><circle cx="19.4" cy="16.2" r="1.6"/><circle cx="4.6" cy="16.2" r="1.6"/></svg>Cercle</button>
+  <button data-m="detail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9M10 19V5M15 19v-7M20 19v-4"/></svg>Analyse</button>
+  <button data-m="grid"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 12h17M9.2 4.5v15M14.8 4.5v15"/></svg>Grille</button>
+  <button data-m="etude"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 11h18M3 15h18"/><ellipse cx="9" cy="17" rx="2.6" ry="2" fill="currentColor"/><path d="M11.6 17V6.5"/></svg>Étude</button>
+  <button data-m="edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Éditer</button>
+</nav>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="drawer-head"><h2 id="drawer-title">Réglages</h2><button class="btn" id="drawer-close" aria-label="Fermer">Fermer</button></div>
+    <section class="dr-sec"><h3 class="label">Lecture</h3><div class="dr-row" id="dr-play"></div></section>
+    <section class="dr-sec"><h3 class="label">Tonalité et son</h3><div id="dr-acc"></div></section>
+    <section class="dr-sec"><h3 class="label">Cercle</h3><div id="dr-circle"></div></section>
+  </div>
+</div>
+
+<main>
+  <section class="stage" aria-label="Cercle">
+    <div class="strip">
+      <div class="mini prev"><span class="label">Avant</span><div class="sym" id="m-prev">–</div></div>
+      <div class="arr">›</div>
+      <div class="mini now"><span class="label">Maintenant</span><div class="sym" id="m-now">–</div></div>
+      <div class="arr">›</div>
+      <div class="mini next"><span class="label">Ensuite</span><div class="sym" id="m-next">–</div></div>
+    </div>
+    <div class="circle-wrap"><svg id="circle" viewBox="0 0 500 500" role="img" aria-label="Cercle des notes de l'accord"></svg></div>
+    <div class="circle-tools">
+      <div class="seg" role="group" aria-label="Disposition du cercle">
+        <button id="mode-chroma" aria-pressed="true">Chromatique</button>
+        <button id="mode-fifths" aria-pressed="false">Quintes</button>
+      </div>
+      <div class="layers">
+        <label><input type="checkbox" id="ly-next" checked> Accord suivant</label>
+        <label><input type="checkbox" id="ly-moves" checked> Mouvements</label>
+        <label><input type="checkbox" id="ly-scale" checked> Gamme de l'accord</label>
+        <label><input type="checkbox" id="ly-key" checked> Tonalité</label>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="sw cur"></i>Accord</span>
+      <span><i class="sw nxt"></i>Accord suivant</span>
+      <span><i class="sw com"></i>Note commune</span>
+      <span><i class="sw pas"></i>Note de passage</span>
+      <span><i class="sw ten"></i>Tension de la gamme</span>
+      <span><i class="sw mel"></i>Note de l'étude</span>
+    </div>
+    <p class="kbd">Espace : lecture · ← → : accord précédent / suivant · cliquez une note pour l'entendre</p>
+  </section>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+
+  <section class="sheet" aria-label="Grille">
+    <div class="seg viewsw" role="tablist" aria-label="Vue">
+      <button id="v-grid" role="tab" aria-pressed="true">Grille &amp; analyse</button>
+      <button id="v-etude" role="tab" aria-pressed="false">Étude</button>
+    </div>
+    <div class="sheet-head">
+      <h2 id="sheet-title">Grille</h2>
+      <div class="sheet-meta">
+        <div class="field"><label class="label" for="sel-key">Tonalité</label><select id="sel-key"></select></div>
+        <div class="field"><label class="label" for="sel-not">Notation</label>
+          <select id="sel-not"><option value="en">C D E F G A B</option><option value="fr">Do Ré Mi Fa Sol La Si</option></select></div>
+        <div class="field"><label class="label" for="sel-comp">Accords</label>
+          <select id="sel-comp"><option value="guitar">Guitare · pompe</option><option value="piano">Piano</option><option value="pad">Nappe douce</option></select></div>
+        <div class="field"><label class="label" for="sel-bass">Basse</label>
+          <select id="sel-bass"><option value="none">Aucune</option><option value="root">Fondamentale</option><option value="two">À deux temps</option><option value="walk">Walking bass</option></select></div>
+        <div class="field"><label class="label" for="sel-theme">Thème</label>
+          <select id="sel-theme"><option value="auto">Auto (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select></div>
+      </div>
+    </div>
+    <div id="view-etude" class="etude" hidden>
+      <div class="et-mode">
+        <div class="seg" role="group" aria-label="Affichage"><button id="d-score" aria-pressed="true">Partition</button><button id="d-scroll" aria-pressed="false">Défilement</button></div>
+        <button class="btn" id="et-full" hidden title="Afficher seulement la portée"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Plein écran</button>
+        <label class="et-follow" id="et-cursor-wrap" hidden>Curseur <select id="et-cursor"><option value="center">au centre</option><option value="left">au tiers gauche</option></select></label>
+        <label class="et-follow"><input type="checkbox" id="et-aid" checked> Couleurs et degrés</label>
+      </div>
+      <div class="stripbox" id="stripbox" hidden>
+        <svg id="strip" role="img" aria-label="Portée qui défile"></svg>
+        <p class="strip-info" id="strip-info"></p>
+        <div class="focus-bar" role="group" aria-label="Commandes du plein écran">
+          <button class="btn play" id="fb-play" aria-label="Lecture"></button>
+          <div class="fb-tempo"><button class="btn" id="fb-slow" aria-label="Ralentir">−</button><span id="fb-bpm"></span><button class="btn" id="fb-fast" aria-label="Accélérer">+</button></div>
+          <button class="btn" id="fb-aid" aria-pressed="true" title="Couleurs et degrés sous les notes">Degrés</button>
+          <button class="btn" id="fb-exit">Quitter</button>
+        </div>
+      </div>
+      <details class="et-box" id="et-box" open>
+      <summary><span class="label">Réglages</span><span class="et-sum" id="et-sum"></span></summary>
+      <div class="et-ctrls">
+        <div class="field"><label class="label" for="et-preset">Pré-réglage</label><select id="et-preset"></select></div>
+        <div class="field"><span class="label">Valeurs</span>
+          <div class="seg" role="group" aria-label="Valeurs de base"><button data-sub="1">Noires</button><button data-sub="2">Croches</button><button data-sub="3">Triolets</button></div></div>
+        <div class="field"><label class="label" for="et-rhy">Style rythmique</label>
+          <select id="et-rhy"><option value="even">Croches régulières</option><option value="phrase">Phrasé, avec respirations</option><option value="sync">Syncopé</option><option value="ballad">Notes longues</option></select></div>
+        <div class="field"><label class="label" for="et-swing">Swing</label>
+          <select id="et-swing"><option value="0.5">Croches égales</option><option value="0.58">Léger</option><option value="0.64">Manouche</option></select></div>
+        <div class="field"><label class="label" for="et-motif">Motif sur l'accord</label>
+          <select id="et-motif"><option value="up">Arpège montant</option><option value="down">Arpège descendant</option><option value="wave">Vague (monte / descend)</option><option value="guide">Notes guides (3 et 7) en premier</option><option value="random">Libre (petits intervalles)</option></select></div>
+        <div class="field"><label class="label" for="et-fill">Notes de passage</label>
+          <select id="et-fill"><option value="none">Aucune, arpèges seuls</option><option value="diat">Diatoniques (gamme de l'accord)</option><option value="chrom">Approches chromatiques</option><option value="encl">Encerclements</option><option value="mix">Mélange</option></select></div>
+        <div class="field"><label class="label" for="et-start">Entrée sur l'accord</label>
+          <select id="et-start"><option value="near">Note la plus proche</option><option value="root">Fondamentale</option><option value="third">Tierce</option><option value="fifth">Quinte</option><option value="seventh">Septième</option></select></div>
+        <div class="field"><label class="label" for="et-inst">Instrument</label>
+          <select id="et-inst"><option value="c">Ut · son réel</option><option value="vln">Violon</option><option value="clb">Clarinette en Si♭</option><option value="asx">Saxophone alto en Mi♭</option><option value="tsx">Saxophone ténor en Si♭</option></select></div>
+        <div class="field"><label class="label" for="et-range">Registre (notes écrites)</label>
+          <select id="et-range"><option value="low">Grave</option><option value="mid">Médium</option><option value="high">Aigu</option><option value="full">Toute la tessiture</option></select></div>
+        <div class="field"><label class="label" for="et-mix">Écoute</label>
+          <select id="et-mix"><option value="both">Ligne + accords</option><option value="mel">Ligne seule</option></select></div>
+        <div class="et-checks">
+          <label><input type="checkbox" id="et-ten"> Tensions 9, 11, 13</label>
+          <label><input type="checkbox" id="et-app"> Approche de l'accord suivant</label>
+          <label><input type="checkbox" id="et-slur"> Liaisons d'archet</label>
+        </div>
+      </div>
+      </details>
+      <div class="et-bar">
+        <p class="et-stats" id="et-stats"></p>
+        <div class="row-btns"><label class="et-follow" id="et-follow-wrap"><input type="checkbox" id="et-follow" checked> Suivre la lecture</label><button class="btn" id="et-new">Nouvelle variante</button><button class="btn" id="et-svg" hidden>Télécharger la partition</button></div>
+      </div>
+      <div class="et-legend" id="et-legend"><span><i style="background:var(--ink)"></i>Note de l'accord</span><span><i style="background:var(--x)"></i>Tension</span><span><i style="background:var(--next)"></i>Passage diatonique</span><span><i style="background:var(--d)"></i>Chromatique</span><span><i style="background:var(--mel)"></i>Note jouée</span></div>
+      <div class="scorebox" id="scorebox"><svg id="score" role="img" aria-label="Partition de l'étude"></svg></div>
+      <p class="help" id="et-help"></p>
+    </div>
+    <div id="view-grid">
+    <div class="fn-legend"><span><i style="background:var(--t)"></i>Tonique</span><span><i style="background:var(--sd)"></i>Sous-dominante</span><span><i style="background:var(--d)"></i>Dominante</span><span><i style="background:var(--x)"></i>Couleur / hors tonalité</span><span>⌐ ¬ II–V · <span style="color:var(--d)">→</span> résolution · <span style="color:var(--x)">⇢</span> subV</span></div>
+    <div class="loopbar"><button class="btn" id="btn-simple" aria-pressed="false" title="Afficher seulement les accords, en grand">Accords seuls</button><button class="btn" id="btn-sel" aria-pressed="false" title="Touchez le premier puis le dernier accord à répéter">Choisir une boucle</button><button class="btn" id="btn-unloop" hidden>Toute la grille</button><span class="loop-info" id="loop-info" aria-live="polite"></span></div>
+    <div class="gridbox" id="gridbox"><div id="grid"></div></div>
+
+    <div class="editor">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-text" aria-selected="true" aria-controls="pane-text">Liste d'accords</button>
+        <button role="tab" id="tab-img" aria-selected="false" aria-controls="pane-img">Depuis une image</button>
+        <button role="tab" id="tab-ex" aria-selected="false" aria-controls="pane-ex">Exemples</button>
+      </div>
+      <div class="pane" id="pane-text" role="tabpanel">
+        <div class="keys" id="keys" role="toolbar" aria-label="Insérer">
+          <button data-ins=" | ">|</button><button data-ins=" % ">%</button><button data-ins=" . ">.</button><button data-ins="b">♭</button><button data-ins="#">♯</button><button data-ins="m">m</button><button data-ins="7">7</button><button data-ins="m7">m7</button><button data-ins="maj7">maj7</button><button data-ins="m7b5">m7♭5</button><button data-ins="dim7">dim7</button><button data-ins="6">6</button><button data-ins="/">/</button><button data-ins="\n| ">↵</button>
+        </div>
+        <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Grille d'accords"></textarea>
+        <ul class="errs" id="errs"></ul>
+        <details class="help-box"><summary>Aide à la saisie</summary>
+        <p class="help">Une ligne = une section. Séparez les mesures par <code>|</code> et les accords d'une même mesure par un espace. <code>%</code> répète la mesure, <code>.</code> prolonge l'accord d'un temps (<code>| C . . G7 |</code>). Préfixe de section : <code>A:</code>. En-têtes possibles : <code>titre:</code>, <code>tonalité: Gm</code>, <code>tempo: 132</code>, <code>mesure: 3/4</code>. Notation anglaise ou française (<code>Rém7 Sol7 Do</code>).</p>
+        </details>
+      </div>
+      <div class="pane" id="pane-img" role="tabpanel" hidden>
+        <label class="drop" id="drop" for="file-img"><input type="file" id="file-img" accept="image/png,image/jpeg,image/webp,image/gif">
+          <span>Déposez une photo ou une capture de grille (lead sheet, grille manuscrite, partition avec accords)</span><span>ou <u>choisissez un fichier</u></span></label>
+        <img id="img-prev" alt="Aperçu de la grille importée" hidden>
+        <div class="row-btns"><button class="btn play" id="btn-read" disabled>Lire la grille</button><button class="btn" id="btn-stop" hidden>Arrêter</button></div>
+        <p class="status" id="img-status">La lecture utilise Claude : la grille reconnue est placée dans l'onglet « Liste d'accords », où vous pouvez la corriger.</p>
+      </div>
+      <div class="pane" id="pane-ex" role="tabpanel" hidden>
+        <div class="presets" id="presets"></div>
+      </div>
+    </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/harmony.js"></script>
+<script src="js/etude.js"></script>
+<script src="js/accomp.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

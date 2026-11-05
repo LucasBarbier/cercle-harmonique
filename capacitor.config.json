@@ -1,0 +1,6 @@
+{
+  "appId": "fr.cercleharmonique.app",
+  "appName": "Cercle Harmonique",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

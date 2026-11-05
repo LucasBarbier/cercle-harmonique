@@ -1,0 +1,20 @@
+node_modules/
+dist/
+android/app/build/
+android/.gradle/
+ios/App/Pods/
+.DS_Store
+*.log
+
+# Réglages propres à la machine (chemins locaux)
+.vscode/settings.json
+android/.idea/
+android/local.properties
+
+# Clés de signature Android : ne jamais publier
+*.jks
+*.keystore
+keystore.properties
+
+# Fichiers de publication générés
+release/
