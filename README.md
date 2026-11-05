@@ -6,9 +6,9 @@ Analyse de grilles d'accords (jazz manouche, jazz) sur un cercle chromatique ou 
 
 | | |
 |---|---|
-| **Dans le navigateur** | [lucasbarbierets.github.io/cercle-harmonique](https://lucasbarbierets.github.io/cercle-harmonique/) : rien à installer, fonctionne aussi sur téléphone. |
-| **Android** | Téléchargez `cercle-harmonique-<version>.apk` dans la [dernière version](https://github.com/LucasBarbierETS/cercle-harmonique/releases/latest), ouvrez le fichier sur le téléphone et autorisez l'installation depuis cette source. |
-| **Hors ligne, sur ordinateur** | Téléchargez `cercle-harmonique-web-<version>.zip` dans la [dernière version](https://github.com/LucasBarbierETS/cercle-harmonique/releases/latest), dézippez-le et ouvrez `index.html`. |
+| **Dans le navigateur** | [lucasbarbier.github.io/cercle-harmonique](https://lucasbarbier.github.io/cercle-harmonique/) : rien à installer, fonctionne aussi sur téléphone. |
+| **Android** | Téléchargez `cercle-harmonique-<version>.apk` dans la [dernière version](https://github.com/LucasBarbier/cercle-harmonique/releases/latest), ouvrez le fichier sur le téléphone et autorisez l'installation depuis cette source. |
+| **Hors ligne, sur ordinateur** | Téléchargez `cercle-harmonique-web-<version>.zip` dans la [dernière version](https://github.com/LucasBarbier/cercle-harmonique/releases/latest), dézippez-le et ouvrez `index.html`. |
 
 L'APK n'est pas distribué par le Play Store : Android affiche donc un avertissement à l'installation. Les mises à jour s'installent par-dessus la version précédente, en gardant vos réglages.
 
